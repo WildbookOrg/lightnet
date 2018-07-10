@@ -173,6 +173,7 @@ class NonMaxSupression(BaseTransform):
         conflicting = (ious > nms_thresh).triu(1)
 
         if class_nms:
+            classes = classes[order]
             same_class = (classes.unsqueeze(0) == classes.unsqueeze(1))
             conflicting = (conflicting & same_class)
 
