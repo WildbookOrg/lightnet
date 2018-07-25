@@ -34,7 +34,7 @@ class Darknet(Lightnet):
         Args:
             weights_file (str): path to file
         """
-        if os.path.splitext(weights_file)[1] == '.pt':
+        if os.path.splitext(weights_file)[1] in ['.pt', '.weights']:
             log.debug('Loading weights from pytorch file')
             super().load_weights(weights_file)
         else:
@@ -50,7 +50,7 @@ class Darknet(Lightnet):
             weights_file (str): path to file
             seen (int, optional): Number of images trained on; Default **self.seen**
         """
-        if os.path.splitext(weights_file)[1] == '.pt':
+        if os.path.splitext(weights_file)[1] in ['.pt', '.weights']:
             log.debug('Saving weights to pytorch file')
             super().save_weights(weights_file, seen)
         else:
