@@ -107,6 +107,11 @@ class Lightnet(nn.Module):
         keys = self.state_dict().keys()
         state = torch.load(weights_file, lambda storage, loc: storage)
 
+        if len(set(state.keys()) - set(['seen', 'weights'])) == 0:
+            seen = state['seen']
+            state = state['weights']
+            state['loss.seen'] = torch.tensor(seen)
+
         # Changed in layer.py: self.layer -> self.layers
         for key in list(state.keys()):
             if '.layer.' in key:
@@ -116,6 +121,7 @@ class Lightnet(nn.Module):
 
         if not strict and state.keys() != keys:
             log.warn('Modules not matching, performing partial update')
+
         self.load_state_dict(state, strict=strict)
 
         log.info(f'Loaded weights from {weights_file}')
