@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 #   Copyright EAVISE
-#   Example: Perform a single image detection with the Lightnet tiny yolo network
+#   Example: Perform a single image detection with the Lightnet yolo network
 #
 
 import os
@@ -26,9 +26,13 @@ NMS_THRESH = .4
 # Functions
 def create_network():
     """ Create the lightnet network """
-    net = ln.models.TinyYolo(CLASSES, args.weight, CONF_THRESH, NMS_THRESH)
+    net = ln.models.Yolo(CLASSES, args.weight, CONF_THRESH, NMS_THRESH)
     net.postprocess.append(ln.data.transform.TensorToBrambox(NETWORK_SIZE, LABELS))
-    net = net.to(device)
+
+    net.eval()
+    if args.cuda:
+        net.cuda()
+
     return net
 
 
@@ -42,12 +46,17 @@ def detect(net, img_path):
     img_tf = ln.data.transform.Letterbox.apply(img_tf, dimension=NETWORK_SIZE)
     img_tf = tf.ToTensor()(img_tf)
     img_tf.unsqueeze_(0)
-    img_tf = img_tf.to(device)
-
+    if args.cuda:
+        img_tf = img_tf.cuda()
+    
     # Run detector
-    with torch.no_grad():
+    if torch.__version__.startswith('0.3'):
+        img_tf = torch.autograd.Variable(img_tf, volatile=True)
         out = net(img_tf)
-    out = ln.data.transform.ReverseLetterbox.apply(out, NETWORK_SIZE, (im_w, im_h)) # Resize bb to true image dimensions
+    else:
+        with torch.no_grad():
+            out = net(img_tf)
+    out = ln.data.transform.ReverseLetterbox.apply(out, NETWORK_SIZE, (im_w, im_h))
 
     return img, out
 
@@ -63,17 +72,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Parse Arguments
-    device = torch.device('cpu')
-    if args.cuda:
-        if torch.cuda.is_available():
-            log.debug('CUDA enabled')
-            device = torch.device('cuda')
-        else:
-            log.error('CUDA not available')
+    if args.cuda and not torch.cuda.is_available():
+        log.error('CUDA not available')
+        args.cuda = False
 
     # Network
     network = create_network()
-    print(network)
     print()
 
     # Detection
@@ -82,7 +86,7 @@ if __name__ == '__main__':
             log.info(img_name)
             image, output = detect(network, img_name)
 
-            image = bbb.draw_boxes(image, output[0], show_labels=args.label)
+            bbb.draw_boxes(image, output[0], show_labels=args.label)
             if args.save:
                 cv2.imwrite('detections.png', image)
             else:
@@ -102,7 +106,7 @@ if __name__ == '__main__':
                 break
 
             image, output = detect(network, img_path)
-            image = bbb.draw_boxes(image, output[0], show_labels=args.label)
+            bbb.draw_boxes(image, output[0], show_labels=args.label)
             if args.save:
                 cv2.imwrite('detections.png', image)
             else:
