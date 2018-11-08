@@ -36,7 +36,7 @@ class Darknet(Lightnet):
             The ``strict`` parameter only works for pytorch pickle files.
             See :class:`~lightnet.network.module.Lightnet` for more information.
         """
-        if os.path.splitext(weights_file)[1] in ['.pt', 'weights']:
+        if os.path.splitext(weights_file)[1] in ['.pt', '.weights']:
             log.debug('Loading weights from pytorch file')
             super().load_weights(weights_file, strict)
         else:
@@ -56,7 +56,7 @@ class Darknet(Lightnet):
             The ``remap`` parameter only works for pytorch pickle files.
             See :class:`~lightnet.network.module.Lightnet` for more information.
         """
-        if os.path.splitext(weights_file)[1] in ['.pt', 'weights']:
+        if os.path.splitext(weights_file)[1] in ['.pt', '.weights']:
             log.debug('Saving weights to pytorch file')
             super().save_weights(weights_file, remap)
         else:
