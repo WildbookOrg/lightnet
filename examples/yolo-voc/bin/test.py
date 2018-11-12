@@ -25,6 +25,7 @@ class TestEngine:
         self.device = kwargs['device']
         self.loss = kwargs['loss']
         self.fast_pr = kwargs['fast_pr']
+        self.weight = kwargs['weight']
         self.network = params.network
         self.network.eval()
         self.network.to(self.device)
@@ -39,11 +40,11 @@ class TestEngine:
             collate_fn = ln.data.list_collate,
         )
 
-    def __call__(self, csv_file, det_file):
+    def __call__(self, csv_file, det_file, results_file):
         if self.loss == 'none':
-            anno, det = self.test_none()
+            anno, det, loss_tot = self.test_none()
         else:
-            anno, det = self.test_loss()
+            anno, det, loss_tot = self.test_loss()
 
         if self.coco_metric:
             m_ap = []
@@ -70,6 +71,11 @@ class TestEngine:
 
             base_path = Path(det_file)
             bbb.generate('det_pickle', det, str(base_path.parent / (base_path.stem + '.pkl')))
+
+        if results_file is not None:
+            with open(results_file, 'a') as results:
+                results.write('%s,%0.08f,%0.08f\n' % (self.weight, loss_tot, m_ap))
+
 
     def ap(self, det, anno, iou=.5, csv=None):
         if csv is not None:
@@ -122,7 +128,6 @@ class TestEngine:
                 anno.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(target)})
                 det.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(output)})
 
-
             t_net_img = t_net * 1000 / len(self.test_dataloader.dataset)
             t_pp_img = t_pp * 1000 / len(self.test_dataloader.dataset)
             t_tot_img = t_net_img + t_pp_img
@@ -130,7 +135,7 @@ class TestEngine:
 
             self.network.postprocess = pp
 
-            return anno, det
+            return anno, det, None
 
     def test_loss(self):
         loss_dict = {'tot': [], 'coord': [], 'conf': [], 'cls': []}
@@ -163,7 +168,7 @@ class TestEngine:
         else:
             log.info(f'Loss:{loss_tot:.5f} (Coord:{loss_coord:.2f} Conf:{loss_conf:.2f} Class:{loss_cls:.2f})')
 
-        return anno, det
+        return anno, det, loss_tot
 
 
 if __name__ == '__main__':
@@ -171,6 +176,7 @@ if __name__ == '__main__':
     parser.add_argument('weight', help='Path to weight file', default=None)
     parser.add_argument('--csv', help='Path for the csv file with the results', default=None)
     parser.add_argument('--det', help='Path for the detection file', default=None)
+    parser.add_argument('--results', help='Path for the results', default=None)
     parser.add_argument('-n', '--network', help='network config file')
     parser.add_argument('-s', '--save', help='File to store network weights', default=None)
     parser.add_argument('-c', '--cuda', action='store_true', help='Use cuda')
@@ -188,18 +194,21 @@ if __name__ == '__main__':
         else:
             log.error('CUDA not available')
 
-    params = ln.engine.HyperParameters.from_file(args.network)
     if args.weight is not None:
-        if args.weight.endswith('.state.pt'):
-            params.load(args.weight)
-        else:
-            params.network.load_weights(args.weight)
-    if args.thresh is not None:
-        params.network.postprocess[0].conf_thresh = args.thresh
+        for weight in ut.glob(args.weight):
+            params = ln.engine.HyperParameters.from_file(args.network)
 
-    if args.save is not None:
-        params.network.save_weights(args.save)
+            if weight.endswith('.state.pt'):
+                params.load(weight)
+            else:
+                params.network.load_weights(weight)
 
-    # Start test
-    eng = TestEngine(params, device=device, loss=args.loss, fast_pr=args.fast_pr)
-    eng(args.csv, args.det)
+            if args.thresh is not None:
+                params.network.postprocess[0].conf_thresh = args.thresh
+
+            if args.save is not None:
+                params.network.save_weights(args.save)
+
+            # Start test
+            eng = TestEngine(params, device=device, loss=args.loss, fast_pr=args.fast_pr, weight=weight)
+            eng(args.csv, args.det, args.results)
