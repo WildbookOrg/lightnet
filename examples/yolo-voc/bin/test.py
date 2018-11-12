@@ -173,7 +173,7 @@ class TestEngine:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Test trained network')
-    parser.add_argument('weight', help='Path to weight file', default=None)
+    parser.add_argument('weight', help='Path to weight file', default=None, nargs='+')
     parser.add_argument('--csv', help='Path for the csv file with the results', default=None)
     parser.add_argument('--det', help='Path for the detection file', default=None)
     parser.add_argument('--results', help='Path for the results', default=None)
@@ -195,7 +195,7 @@ if __name__ == '__main__':
             log.error('CUDA not available')
 
     if args.weight is not None:
-        for weight in ut.glob(args.weight):
+        for weight in args.weight:
             params = ln.engine.HyperParameters.from_file(args.network)
 
             if weight.endswith('.state.pt'):
