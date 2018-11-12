@@ -42,7 +42,9 @@ class TrainEngine(Engine):
         self.train_loss['tot'].append(self.network.loss.loss_tot.item())
         self.train_loss['coord'].append(self.network.loss.loss_coord.item())
         self.train_loss['conf'].append(self.network.loss.loss_conf.item())
-        self.train_loss['cls'].append(self.network.loss.loss_cls.item())
+        loss_cls = self.network.loss.loss_cls
+        loss_cls = np.nan if loss_cls is None else loss_cls.item()
+        self.train_loss['cls'].append(loss_cls)
 
     def train_batch(self):
         self.optimizer.step()
@@ -65,7 +67,7 @@ class TrainEngine(Engine):
         self.scheduler.step(self.batch, epoch=self.batch)
         self.plot_lr(np.array([self.optimizer.param_groups[0]['lr'] * self.batch_size]), np.array([self.batch]))
 
-    @Engine.batch_end(5000)
+    @Engine.batch_end(2000)
     def backup(self):
         self.params.save(os.path.join(self.backup_folder, f'weights_{self.batch}.state.pt'))
         log.info(f'Saved backup')
@@ -112,7 +114,7 @@ class TrainEngine(Engine):
 
     def quit(self):
         if self.batch >= self.max_batches:
-            self.params.network.save(os.path.join(self.backup_folder, 'final.pt'))
+            self.params.save(os.path.join(self.backup_folder, 'final.pt'))
             return True
         elif self.sigint:
             self.params.save(os.path.join(self.backup_folder, 'backup.state.pt'))
@@ -146,7 +148,7 @@ if __name__ == '__main__':
             os.makedirs(args.backup)
         else:
             raise ValueError('Backup path is not a folder')
-    
+
     if args.visdom:
         visdom = visdom.Visdom(port=8080, env=args.visdom_env)
     else:

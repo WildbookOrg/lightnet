@@ -13,13 +13,10 @@ DEBUG = True        # Enable some debug prints with extra information
 ROOT = './data'    # Root folder where the VOCdevkit is located
 
 TRAINSET = [
-    ('2012', 'train'),
-    ('2012', 'val'),
-    ('2007', 'train'),
-    ('2007', 'val'),
+    ('2018', 'train'),
     ]
 TESTSET = [
-    ('2007', 'test'),
+    ('2018', 'val'),
     ]
 
 

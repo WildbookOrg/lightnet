@@ -31,7 +31,7 @@ class TestEngine:
 
         self.test_dataloader = torch.utils.data.DataLoader(
             VOCData(params.test_set, params, False),
-            batch_size = params.mini_batch_size,
+            batch_size = params.batch_size,
             shuffle = False,
             drop_last = False,
             num_workers = 8,
@@ -59,7 +59,7 @@ class TestEngine:
 
         if det_file is not None:
             bbb.filter_discard(det, [lambda b: b.confidence > .25])
-            
+
             det_epfl = {k:v for k,v in det.items() if 'epfl' in k}
             for k,v in det_epfl.items():
                 det_epfl[k] = ln.data.transform.ReverseLetterbox.apply([v], self.params.input_dimension, (512,424))[0]
@@ -118,7 +118,7 @@ class TestEngine:
                 t_net += t2 - t1
                 t_pp += t3 - t2
 
-                base_idx = idx*self.params.mini_batch_size
+                base_idx = idx*self.params.batch_size
                 anno.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(target)})
                 det.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(output)})
 
@@ -144,8 +144,10 @@ class TestEngine:
                 loss_dict['tot'].append(self.network.loss.loss_tot.item()*len(target))
                 loss_dict['coord'].append(self.network.loss.loss_coord.item()*len(target))
                 loss_dict['conf'].append(self.network.loss.loss_conf.item()*len(target))
-                loss_dict['cls'].append(self.network.loss.loss_cls.item()*len(target))
-                base_idx = idx*self.params.mini_batch_size
+                loss_cls = self.network.loss.loss_cls
+                loss_cls = np.nan if loss_cls is None else loss_cls.item()
+                loss_dict['cls'].append(loss_cls*len(target))
+                base_idx = idx*self.params.batch_size
                 anno.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(target)})
                 det.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(output)})
 

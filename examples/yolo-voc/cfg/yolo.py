@@ -6,11 +6,11 @@ __all__ = ['params']
 
 params = ln.engine.HyperParameters(
     # Network
-    class_label_map = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor'],
+    class_label_map = ['dolphin_bottlenose_fin'],
     input_dimension = (416, 416),
     batch_size = 64,
     mini_batch_size = 8,
-    max_batches = 80200,
+    max_batches = 80000,
 
     # Dataset
     _train_set = 'data/train.pkl',
