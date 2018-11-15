@@ -197,11 +197,7 @@ if __name__ == '__main__':
     if args.weight is not None:
         for weight in args.weight:
             params = ln.engine.HyperParameters.from_file(args.network)
-
-            if weight.endswith('.state.pt'):
-                params.load(weight)
-            else:
-                params.network.load_weights(weight)
+            params.load(weight)
 
             if args.thresh is not None:
                 params.network.postprocess[0].conf_thresh = args.thresh
