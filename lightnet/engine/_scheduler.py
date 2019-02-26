@@ -76,4 +76,7 @@ class SchedulerCompositor:
         return state_dict
 
     def load_state_dict(self, state):
-        [self.sched[i].load_state_dict(s) for i, s in enumerate(state)]
+        try:
+            [self.sched[i].load_state_dict(s) for i, s in enumerate(state)]
+        except:
+            pass
