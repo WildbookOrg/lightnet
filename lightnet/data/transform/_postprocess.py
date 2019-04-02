@@ -182,10 +182,11 @@ class SerializeBrambox(BaseTransform):
         super().__init__()
 
     @classmethod
-    def apply(cls, boxes):
-        import utool as ut
-        ut.embed()
-        return [box.serialize() for box in boxes]
+    def apply(cls, boxes_list):
+        return [
+            [box.serialize(return_dict=True) for box in boxes]
+            for boxes in boxes_list
+        ]
 
 
 class TensorToBrambox(BaseTransform):
