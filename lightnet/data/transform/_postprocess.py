@@ -10,7 +10,7 @@ from torch.autograd import Variable
 from brambox.boxes.detections.detection import *
 from .util import BaseTransform
 
-__all__ = ['GetBoundingBoxes', 'NonMaxSupression', 'TensorToBrambox', 'ReverseLetterbox']
+__all__ = ['GetBoundingBoxes', 'NonMaxSupression', 'SerializeBrambox', 'TensorToBrambox', 'ReverseLetterbox']
 log = logging.getLogger(__name__)
 
 
@@ -178,13 +178,13 @@ class NonMaxSupression(BaseTransform):
 class SerializeBrambox(BaseTransform):
     """ Performs a serialization of bounding boxes.
     """
-    def __init__(self, nms_thresh, class_nms=True):
-        super().__init__(nms_thresh=nms_thresh, class_nms=class_nms)
+    def __init__(self):
+        super().__init__()
 
     @classmethod
-    def apply(cls, boxes, nms_thresh, class_nms=True):
+    def apply(cls, boxes):
         ut.embed()
-        return [cls._nms(box, nms_thresh, class_nms) for box in boxes]
+        return [box.serialize() for box in boxes]
 
 
 class TensorToBrambox(BaseTransform):
