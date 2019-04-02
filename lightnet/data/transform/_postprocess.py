@@ -175,6 +175,18 @@ class NonMaxSupression(BaseTransform):
         return boxes[order][keep[:, None].expand_as(boxes)].view(-1, 6).contiguous()
 
 
+class SerializeBrambox(BaseTransform):
+    """ Performs a serialization of bounding boxes.
+    """
+    def __init__(self, nms_thresh, class_nms=True):
+        super().__init__(nms_thresh=nms_thresh, class_nms=class_nms)
+
+    @classmethod
+    def apply(cls, boxes, nms_thresh, class_nms=True):
+        ut.embed()
+        return [cls._nms(box, nms_thresh, class_nms) for box in boxes]
+
+
 class TensorToBrambox(BaseTransform):
     """ Converts a tensor to a list of brambox objects.
 
