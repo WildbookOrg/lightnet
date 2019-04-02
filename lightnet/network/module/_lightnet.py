@@ -67,6 +67,7 @@ class Lightnet(nn.Module):
                 return x
         else:
             print('Ran forward, running postprocess')
+            import utool as ut
             ut.embed()
             if target is not None and callable(self.loss):
                 loss = self.loss(x.clone(), target)
