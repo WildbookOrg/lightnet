@@ -183,6 +183,7 @@ class SerializeBrambox(BaseTransform):
 
     @classmethod
     def apply(cls, boxes):
+        ut.embed()
         return [box.serialize() for box in boxes]
 
 
