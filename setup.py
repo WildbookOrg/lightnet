@@ -1,5 +1,4 @@
-import setuptools as setup
-from pkg_resources import get_distribution, DistributionNotFound
+from setuptools import find_packages, setup
 
 
 def get_dist(pkgname):
@@ -7,9 +6,6 @@ def get_dist(pkgname):
         return get_distribution(pkgname)
     except DistributionNotFound:
         return None
-
-def find_packages():
-    return ['lightnet'] + ['lightnet.'+p for p in setup.find_packages('lightnet')]
 
 def get_version():
     with open('VERSION', 'r') as f:
@@ -26,15 +22,15 @@ def get_version():
 requirements = [
     'numpy',
     'torchvision',
-    'brambox',
+    'wbia-brambox',
 ]
-pillow_req = 'pillow-simd' if get_dist('pillow-simd') is not None else 'pillow'
-requirements.append(pillow_req)
 
-setup.setup(
-    name='lightnet',
+
+setup_kwargs = dict(
+    name='wbia-lightnet',
     version=get_version(),
-    author='EAVISE',
+    author='EAVISE, WildMe Developers',
+    author_email='dev@wildme.org',
     description='Building blocks for recreating darknet networks in pytorch',
     long_description=open('README.md').read(),
     packages=find_packages(),
@@ -44,3 +40,7 @@ setup.setup(
         'visual': ['visdom']
     },
 )
+
+
+if __name__ == '__main__':
+    setup(**setup_kwargs)
