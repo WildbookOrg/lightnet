@@ -62,7 +62,7 @@ You can check whether to annotation conversion was succesfull, by running the **
    bbox_view.py -lx .jpg anno_pickle ROOT/test.pkl ROOT/VOCdevkit
 
 .. Note::
-   There is no validation set.  
+   There is no validation set.
    We perform the same training cycle as darknet, and thus have no testing whilst training the network.
    This means there is no need for a separate testing and validation set,
    but also means we have no way to check how well the network performs whilst it is training.
@@ -96,8 +96,8 @@ Use the **test.py** script to test the model. You can again use *test.py --help*
 .. code:: bash
 
    # We use tqdm for a nice loading bar
-   pip install tqdm 
-   
+   pip install tqdm
+
    # Adapt the model parameters inside of test.py to suite your needs
    ./bin/test.py -cv -n cfg/yolo.py backup/final.state.pt
 

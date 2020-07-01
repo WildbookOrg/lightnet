@@ -27,22 +27,22 @@ The second method is by using the :func:`lightnet.logger.setConsoleLevel` functi
 >>> import sys
 >>> sys.stderr.write = print  # Ignore this: for doctest only
 >>> import logging
->>> 
+>>>
 >>> # This line will log all messages to a file.
 >>> # Note: that this also saves messages from other packages using the logging module
 >>> logging.basicConfig(filename='file.log', filemode='w')  # doctest: +SKIP
->>> 
+>>>
 >>> # This line will only log TRAIN and TEST level messages to a file
 >>> # Note: this logfile will only consider messages from 'lightnet.*' loggers
 >>> filehandler = ln.logger.setLogFile('file.log', levels=('TRAIN', 'TEST'), filemode='w')  # doctest: +SKIP
->>> 
+>>>
 >>> # Use this function to enable/disable colored terminal output
 >>> ln.logger.setConsoleColor(False)
->>> 
+>>>
 >>> # This line enables all messages from lightnet to be printed on the console
 >>> # Note: messages that were printed before this line (eg. upon loading the package) will not be printed
 >>> ln.logger.setConsoleLevel(logging.NOTSET)
->>> 
+>>>
 >>> # If you want to use the logging module yourself, and have the same styling as the lightnet logger, use this
 >>> log = logging.getLogger('lightnet.choose-a-name-here')
 >>> log.debug('This is a debug message')  # doctest: +NORMALIZE_WHITESPACE

@@ -1,8 +1,8 @@
 LIGHTNET
 ========
-<img src="docs/.static/lightnet.png" alt="Logo" width="250" height="250">  
+<img src="docs/.static/lightnet.png" alt="Logo" width="250" height="250">
 
-Building blocks to recreate Darknet networks in Pytorch  
+Building blocks to recreate Darknet networks in Pytorch
 [![Version][version-badge]][documentation-url]
 [![PyTorch][pytorch-badge]][pytorch-url]
 [![Pipeline][pipeline-badge]][pipeline-badge]
@@ -11,11 +11,11 @@ Building blocks to recreate Darknet networks in Pytorch
 
 ## Why another framework
 [pytorch-yolo2](https://github.com/marvis/pytorch-yolo2) is working perfectly fine, but does not easily allow a user to modify an existing network.
-This is why I decided to create a library, that gives the user all the necessary building blocks, to recreate any darknet network.  
+This is why I decided to create a library, that gives the user all the necessary building blocks, to recreate any darknet network.
 This library has everything you need to control your network, weight loading & saving, datasets, dataloaders and data augmentation.
 
 ## Installing
-First install [PyTorch and Torchvision](http://pytorch.org/).  
+First install [PyTorch and Torchvision](http://pytorch.org/).
 Then clone this repository and run one of the following commands:
 ```bash
 # If you just want to use Lightnet
@@ -27,7 +27,7 @@ pip install -r develop.txt
 > This project is python 3.6 and higher so on some systems you might want to use 'pip3.6' instead of 'pip'
 
 ## How to use
-[Click Here](https://eavise.gitlab.io/lightnet) for the API documentation and guides on how to use this library.  
+[Click Here](https://eavise.gitlab.io/lightnet) for the API documentation and guides on how to use this library.
 The _examples_ folder contains code snippets to train and test networks with lightnet. For examples on how to implement your own networks, you can take a look at the files in _lightnet/models_.
 >If you are using a different version than the latest,
 >you can generate the documentation yourself by running `make clean html` in the _docs_ folder.
