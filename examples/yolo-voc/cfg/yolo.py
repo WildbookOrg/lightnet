@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import lightnet as ln
 import torch
 

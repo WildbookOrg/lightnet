@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Lightnet dataset that works with brambox annotations
 #   Copyright EAVISE

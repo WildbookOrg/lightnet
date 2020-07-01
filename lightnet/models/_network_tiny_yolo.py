@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Darknet Tiny YOLOv2 model
 #   Copyright EAVISE

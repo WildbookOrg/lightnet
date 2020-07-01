@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Darknet YOLOv2 model with Mobilenet backend
 #   Copyright EAVISE

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Lightnet base network modules
 #   Copyright EAVISE

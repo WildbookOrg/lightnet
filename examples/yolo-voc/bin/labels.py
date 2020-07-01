@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #   Copyright EAVISE
 #   Example: Transform annotations for VOCdevkit to the brambox pickle format

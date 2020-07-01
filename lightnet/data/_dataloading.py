@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Lightnet dataset and dataloading mechanisms
 #   Copyright EAVISE

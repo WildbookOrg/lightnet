@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Base network structure for Darknet networks
 #   Copyright EAVISE

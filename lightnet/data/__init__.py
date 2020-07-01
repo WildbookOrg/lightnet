@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Lightnet Data Module |br|
 This module contains everything related to pre- and post-processing of your data.

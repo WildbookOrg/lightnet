@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Darknet related layers
 #   Copyright EAVISE
