@@ -28,6 +28,7 @@ class Lightnet(nn.Module):
         If you define **self.layers** as a :class:`pytorch:torch.nn.Sequential` or :class:`pytorch:torch.nn.ModuleList`,
         the default ``_forward()`` function can use these layers automatically to run the network.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -45,7 +46,9 @@ class Lightnet(nn.Module):
                 x = module(x)
             return x
         else:
-            raise NotImplementedError(f'No _forward function defined and no default behaviour for this type of layers [{type(self.layers)}]')
+            raise NotImplementedError(
+                f'No _forward function defined and no default behaviour for this type of layers [{type(self.layers)}]'
+            )
 
     def forward(self, x, target=None):
         """ This default forward function will compute the output of the network as ``self._forward(x)``.
@@ -74,7 +77,7 @@ class Lightnet(nn.Module):
                     x = self.postprocess(x)
                 return x, loss
             elif callable(self.postprocess):
-                    return self.postprocess(x)
+                return self.postprocess(x)
             else:
                 return x
 

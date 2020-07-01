@@ -33,7 +33,19 @@ class DarknetDataset(BramboxDataset):
     Returns:
         tuple: image_tensor, list of brambox boxes
     """
-    def __init__(self, data_file, augment=True, input_dimension=(416, 416), jitter=.2, flip=.5, hue=.1, saturation=1.5, value=1.5, class_label_map=None):
+
+    def __init__(
+        self,
+        data_file,
+        augment=True,
+        input_dimension=(416, 416),
+        jitter=0.2,
+        flip=0.5,
+        hue=0.1,
+        saturation=1.5,
+        value=1.5,
+        class_label_map=None,
+    ):
         def identify(name):
             return self.img_paths[self.anno_paths.index(name)]
 
@@ -42,7 +54,7 @@ class DarknetDataset(BramboxDataset):
 
         # Prepare variables for brambox init
         anno_format = 'anno_darknet'
-        self.anno_paths = [os.path.splitext(p)[0]+'.txt' for p in self.img_paths]
+        self.anno_paths = [os.path.splitext(p)[0] + '.txt' for p in self.img_paths]
 
         lb = lnd.transform.Letterbox(dataset=self)
         rf = lnd.transform.RandomFlip(flip)
@@ -60,4 +72,13 @@ class DarknetDataset(BramboxDataset):
         w, h = first_img.size
         kwargs = {'image_width': w, 'image_height': h}
 
-        super().__init__(anno_format, self.anno_paths, input_dimension, class_label_map,  identify, img_tf, anno_tf, **kwargs)
+        super().__init__(
+            anno_format,
+            self.anno_paths,
+            input_dimension,
+            class_label_map,
+            identify,
+            img_tf,
+            anno_tf,
+            **kwargs
+        )

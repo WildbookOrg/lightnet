@@ -51,7 +51,7 @@ intersphinx_mapping = {
     'pytorch': ('http://pytorch.org/docs/stable/', None),
     'python': ('https://docs.python.org/3.6', None),
     'brambox': ('https://eavise.gitlab.io/brambox', None),
-    }
+}
 
 doctest_global_setup = """
 import torch
@@ -71,7 +71,7 @@ source_parsers = {
     '.md': 'recommonmark.parser.CommonMarkParser',
 }
 source_suffix = ['.rst', '.md']
-#source_suffix = '.rst'
+# source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'
@@ -140,7 +140,7 @@ html_static_path = ['.static']
 html_context = {
     'css_files': [
         'https://fonts.googleapis.com/css?family=Lato',
-        '_static/pytorch_theme.css'
+        '_static/pytorch_theme.css',
     ],
 }
 #
@@ -166,15 +166,12 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     #
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
-
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
@@ -184,8 +181,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Lightnet.tex', 'Lightnet Documentation',
-     '0phoff', 'manual'),
+    (master_doc, 'Lightnet.tex', 'Lightnet Documentation', '0phoff', 'manual'),
 ]
 
 
@@ -193,10 +189,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'lightnet', 'Lightnet Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, 'lightnet', 'Lightnet Documentation', [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -205,7 +198,13 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Lightnet', 'Lightnet Documentation',
-     author, 'Lightnet', 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        'Lightnet',
+        'Lightnet Documentation',
+        author,
+        'Lightnet',
+        'One line description of project.',
+        'Miscellaneous',
+    ),
 ]

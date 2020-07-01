@@ -25,7 +25,19 @@ class RegionLoss(nn.modules.loss._Loss):
         thresh (float): minimum iou between a predicted box and ground truth for them to be considered matching
         seen (torch.Tensor): How many images the network has already been trained on.
     """
-    def __init__(self, num_classes, anchors, reduction=32, seen=0, coord_scale=1.0, noobject_scale=1.0, object_scale=5.0, class_scale=1.0, thresh=0.6):
+
+    def __init__(
+        self,
+        num_classes,
+        anchors,
+        reduction=32,
+        seen=0,
+        coord_scale=1.0,
+        noobject_scale=1.0,
+        object_scale=5.0,
+        class_scale=1.0,
+        thresh=0.6,
+    ):
         super().__init__()
         self.num_classes = num_classes
         self.num_anchors = len(anchors)
@@ -103,16 +115,29 @@ class RegionLoss(nn.modules.loss._Loss):
         # Get x,y,w,h,conf,cls
         output = output.view(nB, nA, -1, nPixels)
         coord = torch.zeros_like(output[:, :, :4])
-        coord[:, :, :2] = output[:, :, :2].sigmoid()    # tx,ty
-        coord[:, :, 2:4] = output[:, :, 2:4]            # tw,th
+        coord[:, :, :2] = output[:, :, :2].sigmoid()  # tx,ty
+        coord[:, :, 2:4] = output[:, :, 2:4]  # tw,th
         conf = output[:, :, 4].sigmoid()
         if nC > 1:
-            cls = output[:, :, 5:].contiguous().view(nB*nA, nC, nPixels).transpose(1, 2).contiguous().view(-1, nC)
+            cls = (
+                output[:, :, 5:]
+                .contiguous()
+                .view(nB * nA, nC, nPixels)
+                .transpose(1, 2)
+                .contiguous()
+                .view(-1, nC)
+            )
 
         # Create prediction boxes
-        pred_boxes = torch.FloatTensor(nB*nA*nPixels, 4)
-        lin_x = torch.linspace(0, nW-1, nW).repeat(nH, 1).view(nPixels).to(device)
-        lin_y = torch.linspace(0, nH-1, nH).view(nH, 1).repeat(1, nW).view(nPixels).to(device)
+        pred_boxes = torch.FloatTensor(nB * nA * nPixels, 4)
+        lin_x = torch.linspace(0, nW - 1, nW).repeat(nH, 1).view(nPixels).to(device)
+        lin_y = (
+            torch.linspace(0, nH - 1, nH)
+            .view(nH, 1)
+            .repeat(1, nW)
+            .view(nPixels)
+            .to(device)
+        )
         anchor_w = self.anchors[:, 0].contiguous().view(nA, 1).to(device)
         anchor_h = self.anchors[:, 1].contiguous().view(nA, 1).to(device)
 
@@ -123,7 +148,9 @@ class RegionLoss(nn.modules.loss._Loss):
         pred_boxes = pred_boxes.cpu()
 
         # Get target values
-        coord_mask, conf_mask, cls_mask, tcoord, tconf, tcls = self.build_targets(pred_boxes, target, nH, nW)
+        coord_mask, conf_mask, cls_mask, tcoord, tconf, tcls = self.build_targets(
+            pred_boxes, target, nH, nW
+        )
         coord_mask = coord_mask.expand_as(tcoord).to(device).sqrt()
         conf_mask = conf_mask.to(device).sqrt()
         tcoord = tcoord.to(device)
@@ -135,11 +162,18 @@ class RegionLoss(nn.modules.loss._Loss):
 
         # Compute losses
         mse = nn.MSELoss(size_average=False)
-        self.loss_coord = self.coord_scale * mse(coord*coord_mask, tcoord*coord_mask) / nB
-        self.loss_conf = mse(conf*conf_mask, tconf*conf_mask) / nB
+        self.loss_coord = (
+            self.coord_scale * mse(coord * coord_mask, tcoord * coord_mask) / nB
+        )
+        self.loss_conf = mse(conf * conf_mask, tconf * conf_mask) / nB
         if nC > 1:
             if tcls.numel() > 0:
-                self.loss_cls = self.class_scale * 2 * nn.CrossEntropyLoss(size_average=False)(cls, tcls) / nB
+                self.loss_cls = (
+                    self.class_scale
+                    * 2
+                    * nn.CrossEntropyLoss(size_average=False)(cls, tcls)
+                    / nB
+                )
             else:
                 self.loss_cls = torch.tensor(0.0).to(device)
             self.loss_tot = self.loss_coord + self.loss_conf + self.loss_cls
@@ -162,8 +196,8 @@ class RegionLoss(nn.modules.loss._Loss):
         nB = ground_truth.size(0)
         nT = ground_truth.size(1)
         nA = self.num_anchors
-        nAnchors = nA*nH*nW
-        nPixels = nH*nW
+        nAnchors = nA * nH * nW
+        nPixels = nH * nW
 
         # Tensors
         conf_mask = torch.ones(nB, nA, nPixels, requires_grad=False) * self.noobject_scale
@@ -178,19 +212,31 @@ class RegionLoss(nn.modules.loss._Loss):
             # coord_mask.fill_(.01 / self.coord_scale)
 
             if self.anchor_step == 4:
-                tcoord[:, :, 0] = self.anchors[:, 2].contiguous().view(1, nA, 1, 1).repeat(nB, 1, 1, nPixels)
-                tcoord[:, :, 1] = self.anchors[:, 3].contiguous().view(1, nA, 1, 1).repeat(nB, 1, 1, nPixels)
+                tcoord[:, :, 0] = (
+                    self.anchors[:, 2]
+                    .contiguous()
+                    .view(1, nA, 1, 1)
+                    .repeat(nB, 1, 1, nPixels)
+                )
+                tcoord[:, :, 1] = (
+                    self.anchors[:, 3]
+                    .contiguous()
+                    .view(1, nA, 1, 1)
+                    .repeat(nB, 1, 1, nPixels)
+                )
             else:
                 tcoord[:, :, 0].fill_(0.5)
                 tcoord[:, :, 1].fill_(0.5)
 
         for b in range(nB):
-            gt = ground_truth[b][(ground_truth[b, :, 0] >= 0)[:, None].expand_as(ground_truth[b])].view(-1, 5)
-            if gt.numel() == 0:     # No gt for this image
+            gt = ground_truth[b][
+                (ground_truth[b, :, 0] >= 0)[:, None].expand_as(ground_truth[b])
+            ].view(-1, 5)
+            if gt.numel() == 0:  # No gt for this image
                 continue
 
             # Build up tensors
-            cur_pred_boxes = pred_boxes[b*nAnchors:(b+1)*nAnchors]
+            cur_pred_boxes = pred_boxes[b * nAnchors : (b + 1) * nAnchors]
             if self.anchor_step == 4:
                 anchors = self.anchors.clone()
                 anchors[:, :2] = 0
@@ -215,20 +261,26 @@ class RegionLoss(nn.modules.loss._Loss):
             # Set masks and target values for each gt
             gt_size = gt.size(0)
             for i in range(gt_size):
-                gi = min(nW-1, max(0, int(gt[i, 0])))
-                gj = min(nH-1, max(0, int(gt[i, 1])))
+                gi = min(nW - 1, max(0, int(gt[i, 0])))
+                gj = min(nH - 1, max(0, int(gt[i, 1])))
                 best_n = best_anchors[i]
-                iou = iou_gt_pred[i][best_n*nPixels+gj*nW+gi]
+                iou = iou_gt_pred[i][best_n * nPixels + gj * nW + gi]
 
-                coord_mask[b][best_n][0][gj*nW+gi] = 2 - (gt[i, 2] * gt[i, 3]) / nPixels
-                cls_mask[b][best_n][gj*nW+gi] = 1
-                conf_mask[b][best_n][gj*nW+gi] = self.object_scale
-                tcoord[b][best_n][0][gj*nW+gi] = gt[i, 0] - gi
-                tcoord[b][best_n][1][gj*nW+gi] = gt[i, 1] - gj
-                tcoord[b][best_n][2][gj*nW+gi] = math.log(gt[i, 2]/self.anchors[best_n, 0])
-                tcoord[b][best_n][3][gj*nW+gi] = math.log(gt[i, 3]/self.anchors[best_n, 1])
-                tconf[b][best_n][gj*nW+gi] = iou
-                tcls[b][best_n][gj*nW+gi] = ground_truth[b, i, 0]
+                coord_mask[b][best_n][0][gj * nW + gi] = (
+                    2 - (gt[i, 2] * gt[i, 3]) / nPixels
+                )
+                cls_mask[b][best_n][gj * nW + gi] = 1
+                conf_mask[b][best_n][gj * nW + gi] = self.object_scale
+                tcoord[b][best_n][0][gj * nW + gi] = gt[i, 0] - gi
+                tcoord[b][best_n][1][gj * nW + gi] = gt[i, 1] - gj
+                tcoord[b][best_n][2][gj * nW + gi] = math.log(
+                    gt[i, 2] / self.anchors[best_n, 0]
+                )
+                tcoord[b][best_n][3][gj * nW + gi] = math.log(
+                    gt[i, 3] / self.anchors[best_n, 1]
+                )
+                tconf[b][best_n][gj * nW + gi] = iou
+                tcls[b][best_n][gj * nW + gi] = ground_truth[b, i, 0]
 
         return coord_mask, conf_mask, cls_mask, tcoord, tconf, tcls
 
@@ -237,8 +289,8 @@ class RegionLoss(nn.modules.loss._Loss):
         # Parameters
         nB = len(ground_truth)
         nA = self.num_anchors
-        nAnchors = nA*nH*nW
-        nPixels = nH*nW
+        nAnchors = nA * nH * nW
+        nPixels = nH * nW
 
         # Tensors
         conf_mask = torch.ones(nB, nA, nPixels, requires_grad=False) * self.noobject_scale
@@ -253,18 +305,28 @@ class RegionLoss(nn.modules.loss._Loss):
             # coord_mask.fill_(.01 / self.coord_scale)
 
             if self.anchor_step == 4:
-                tcoord[:, :, 0] = self.anchors[:, 2].contiguous().view(1, nA, 1, 1).repeat(nB, 1, 1, nPixels)
-                tcoord[:, :, 1] = self.anchors[:, 3].contiguous().view(1, nA, 1, 1).repeat(nB, 1, 1, nPixels)
+                tcoord[:, :, 0] = (
+                    self.anchors[:, 2]
+                    .contiguous()
+                    .view(1, nA, 1, 1)
+                    .repeat(nB, 1, 1, nPixels)
+                )
+                tcoord[:, :, 1] = (
+                    self.anchors[:, 3]
+                    .contiguous()
+                    .view(1, nA, 1, 1)
+                    .repeat(nB, 1, 1, nPixels)
+                )
             else:
                 tcoord[:, :, 0].fill_(0.5)
                 tcoord[:, :, 1].fill_(0.5)
 
         for b in range(nB):
-            if len(ground_truth[b]) == 0:   # No gt for this image
+            if len(ground_truth[b]) == 0:  # No gt for this image
                 continue
 
             # Build up tensors
-            cur_pred_boxes = pred_boxes[b*nAnchors:(b+1)*nAnchors]
+            cur_pred_boxes = pred_boxes[b * nAnchors : (b + 1) * nAnchors]
             if self.anchor_step == 4:
                 anchors = self.anchors.clone()
                 anchors[:, :2] = 0
@@ -272,8 +334,8 @@ class RegionLoss(nn.modules.loss._Loss):
                 anchors = torch.cat([torch.zeros_like(self.anchors), self.anchors], 1)
             gt = torch.zeros(len(ground_truth[b]), 4)
             for i, anno in enumerate(ground_truth[b]):
-                gt[i, 0] = (anno.x_top_left + anno.width/2) / self.reduction
-                gt[i, 1] = (anno.y_top_left + anno.height/2) / self.reduction
+                gt[i, 0] = (anno.x_top_left + anno.width / 2) / self.reduction
+                gt[i, 1] = (anno.y_top_left + anno.height / 2) / self.reduction
                 gt[i, 2] = anno.width / self.reduction
                 gt[i, 3] = anno.height / self.reduction
 
@@ -290,24 +352,32 @@ class RegionLoss(nn.modules.loss._Loss):
 
             # Set masks and target values for each gt
             for i, anno in enumerate(ground_truth[b]):
-                gi = min(nW-1, max(0, int(gt[i, 0])))
-                gj = min(nH-1, max(0, int(gt[i, 1])))
+                gi = min(nW - 1, max(0, int(gt[i, 0])))
+                gj = min(nH - 1, max(0, int(gt[i, 1])))
                 best_n = best_anchors[i]
-                iou = iou_gt_pred[i][best_n*nPixels+gj*nW+gi]
+                iou = iou_gt_pred[i][best_n * nPixels + gj * nW + gi]
 
                 if anno.ignore:
-                    conf_mask[b][best_n][gj*nW+gi] = 0
-                    coord_mask[b][best_n][0][gj*nW+gi] = 0  # Explicitely set to zero for when seen < 12800
+                    conf_mask[b][best_n][gj * nW + gi] = 0
+                    coord_mask[b][best_n][0][
+                        gj * nW + gi
+                    ] = 0  # Explicitely set to zero for when seen < 12800
                 else:
-                    coord_mask[b][best_n][0][gj*nW+gi] = 2 - (gt[i, 2] * gt[i, 3]) / nPixels
-                    cls_mask[b][best_n][gj*nW+gi] = 1
-                    conf_mask[b][best_n][gj*nW+gi] = self.object_scale
-                    tcoord[b][best_n][0][gj*nW+gi] = gt[i, 0] - gi
-                    tcoord[b][best_n][1][gj*nW+gi] = gt[i, 1] - gj
-                    tcoord[b][best_n][2][gj*nW+gi] = math.log(gt[i, 2]/self.anchors[best_n, 0])
-                    tcoord[b][best_n][3][gj*nW+gi] = math.log(gt[i, 3]/self.anchors[best_n, 1])
-                    tconf[b][best_n][gj*nW+gi] = iou
-                    tcls[b][best_n][gj*nW+gi] = anno.class_id
+                    coord_mask[b][best_n][0][gj * nW + gi] = (
+                        2 - (gt[i, 2] * gt[i, 3]) / nPixels
+                    )
+                    cls_mask[b][best_n][gj * nW + gi] = 1
+                    conf_mask[b][best_n][gj * nW + gi] = self.object_scale
+                    tcoord[b][best_n][0][gj * nW + gi] = gt[i, 0] - gi
+                    tcoord[b][best_n][1][gj * nW + gi] = gt[i, 1] - gj
+                    tcoord[b][best_n][2][gj * nW + gi] = math.log(
+                        gt[i, 2] / self.anchors[best_n, 0]
+                    )
+                    tcoord[b][best_n][3][gj * nW + gi] = math.log(
+                        gt[i, 3] / self.anchors[best_n, 1]
+                    )
+                    tconf[b][best_n][gj * nW + gi] = iou
+                    tcls[b][best_n][gj * nW + gi] = anno.class_id
 
         return coord_mask, conf_mask, cls_mask, tcoord, tconf, tcls
 

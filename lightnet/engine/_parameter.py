@@ -44,7 +44,16 @@ class HyperParameters:
         If you are using this class, save it as a regular variable, through another name (via kwargs). |br|
         I know this solution is suboptimal, but I am not willing to hack around this, as I believe this is something dirty in the torch codebase itself and should be handled there.
     """
-    def __init__(self, network=None, optimizers=None, schedulers=None, batch_size=1, mini_batch_size=None, **kwargs):
+
+    def __init__(
+        self,
+        network=None,
+        optimizers=None,
+        schedulers=None,
+        batch_size=1,
+        mini_batch_size=None,
+        **kwargs,
+    ):
         self.network = network
         self.batch_size = batch_size
         self.batch = 0
@@ -82,7 +91,9 @@ class HyperParameters:
                 if not serialize:
                     self.__no_serialize.append(key)
             else:
-                log.error(f'{key} attribute already exists as a HyperParameter and will not be overwritten.')
+                log.error(
+                    f'{key} attribute already exists as a HyperParameter and will not be overwritten.'
+                )
 
     @classmethod
     def from_file(cls, path, variable='params', **kwargs):
@@ -106,12 +117,16 @@ class HyperParameters:
             cfg = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(cfg)
         except AttributeError as err:
-            raise ImportError(f'Failed to import the file [{path}]. Are you sure it is a valid python file?') from err
+            raise ImportError(
+                f'Failed to import the file [{path}]. Are you sure it is a valid python file?'
+            ) from err
 
         try:
             params = getattr(cfg, variable)
         except AttributeError as err:
-            raise AttributeError(f'Configuration variable [{variable}] not found in file [{path}]') from err
+            raise AttributeError(
+                f'Configuration variable [{variable}] not found in file [{path}]'
+            ) from err
 
         if callable(params):
             params = params(**kwargs)
@@ -121,7 +136,9 @@ class HyperParameters:
         elif isinstance(params, dict):
             return cls(**params)
         else:
-            raise TypeError(f'Unkown type for configuration variable {variable} [{type(params).__name__}]. This variable should be a dictionary or lightnet.engine.HyperParameters object.')
+            raise TypeError(
+                f'Unkown type for configuration variable {variable} [{type(params).__name__}]. This variable should be a dictionary or lightnet.engine.HyperParameters object.'
+            )
 
     @property
     def optimizer(self):

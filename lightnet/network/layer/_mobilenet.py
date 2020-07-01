@@ -25,7 +25,10 @@ class Conv2dDepthWise(nn.Module):
 
     .. _Mobilenets: https://arxiv.org/pdf/1704.04861.pdf
     """
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, momentum=0.01):
+
+    def __init__(
+        self, in_channels, out_channels, kernel_size, stride, padding, momentum=0.01
+    ):
         super().__init__()
 
         # Parameters
@@ -38,13 +41,20 @@ class Conv2dDepthWise(nn.Module):
 
         # Layer
         self.layers = nn.Sequential(
-            nn.Conv2d(self.in_channels, self.in_channels, self.kernel_size, self.stride, self.padding, groups=self.in_channels, bias=False),
+            nn.Conv2d(
+                self.in_channels,
+                self.in_channels,
+                self.kernel_size,
+                self.stride,
+                self.padding,
+                groups=self.in_channels,
+                bias=False,
+            ),
             nn.BatchNorm2d(self.in_channels, momentum=self.momentum),
             nn.ReLU(inplace=True),
-
             nn.Conv2d(self.in_channels, self.out_channels, 1, 1, 0, bias=False),
             nn.BatchNorm2d(self.out_channels, momentum=self.momentum),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
 
     def __repr__(self):

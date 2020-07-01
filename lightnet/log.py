@@ -16,6 +16,7 @@ __all__ = ['logger']
 # Formatter
 class ColorCode(Enum):
     """ Color Codes """
+
     RESET = '\033[00m'
     BOLD = '\033[01m'
 

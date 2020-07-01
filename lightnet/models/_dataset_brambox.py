@@ -28,7 +28,18 @@ class BramboxDataset(lnd.Dataset):
         anno_transform (torchvision.transforms.Compose): Transforms to perform on the annotations
         kwargs (dict): Keyword arguments that are passed to the brambox parser
     """
-    def __init__(self, anno_format, anno_filename, input_dimension, class_label_map=None, identify=None, img_transform=None, anno_transform=None, **kwargs):
+
+    def __init__(
+        self,
+        anno_format,
+        anno_filename,
+        input_dimension,
+        class_label_map=None,
+        identify=None,
+        img_transform=None,
+        anno_transform=None,
+        **kwargs,
+    ):
         super().__init__(input_dimension)
         self.img_tf = img_transform
         self.anno_tf = anno_transform
@@ -38,19 +49,29 @@ class BramboxDataset(lnd.Dataset):
             self.id = lambda name: os.path.splitext(name)[0] + '.png'
 
         # Get annotations
-        self.annos = bbb.parse(anno_format, anno_filename, identify=lambda f: f, class_label_map=class_label_map, **kwargs)
+        self.annos = bbb.parse(
+            anno_format,
+            anno_filename,
+            identify=lambda f: f,
+            class_label_map=class_label_map,
+            **kwargs,
+        )
         self.keys = list(self.annos)
 
         # Add class_ids
         if class_label_map is None:
-            log.warn(f'No class_label_map given, annotations wont have a class_id values for eg. loss function')
+            log.warn(
+                f'No class_label_map given, annotations wont have a class_id values for eg. loss function'
+            )
         for k, annos in self.annos.items():
             for a in annos:
                 if class_label_map is not None:
                     try:
                         a.class_id = class_label_map.index(a.class_label)
                     except ValueError as err:
-                        raise ValueError(f'{a.class_label} is not found in the class_label_map') from err
+                        raise ValueError(
+                            f'{a.class_label} is not found in the class_label_map'
+                        ) from err
                 else:
                     a.class_id = 0
 

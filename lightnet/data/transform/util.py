@@ -40,6 +40,7 @@ class Compose(list):
 
     .. _the issue: https://github.com/pytorch/vision/issues/456
     """
+
     def __call__(self, data):
         for tf in self:
             data = tf(data)
@@ -58,6 +59,7 @@ class BaseTransform(ABC):
     This class allows to create an object with some case specific settings, and then call it with the data to perform the transformation.
     It also allows to call the static method ``apply`` with the data and settings. This is usefull if you want to transform a single data object.
     """
+
     def __init__(self, **kwargs):
         for key in kwargs:
             setattr(self, key, kwargs[key])
@@ -82,6 +84,7 @@ class BaseMultiTransform(ABC):
     This class exists for transforms that affect both images and annotations.
     It provides a classmethod ``apply``, that will perform the transormation on one (data, target) pair.
     """
+
     def __init__(self, **kwargs):
         for key in kwargs:
             setattr(self, key, kwargs[key])

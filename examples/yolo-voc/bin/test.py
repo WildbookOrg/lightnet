@@ -33,12 +33,12 @@ class TestEngine:
 
         self.test_dataloader = torch.utils.data.DataLoader(
             VOCData(params.test_set, params, False),
-            batch_size = params.batch_size,
-            shuffle = False,
-            drop_last = False,
-            num_workers = 8,
-            pin_memory = True,
-            collate_fn = ln.data.list_collate,
+            batch_size=params.batch_size,
+            shuffle=False,
+            drop_last=False,
+            num_workers=8,
+            pin_memory=True,
+            collate_fn=ln.data.list_collate,
         )
 
     def __call__(self, csv_file, det_file, results_file):
@@ -50,7 +50,7 @@ class TestEngine:
         if self.coco_metric:
             m_ap = []
             for i in range(50, 95, 5):
-                m_ap.append(self.ap(det, anno, i/100))
+                m_ap.append(self.ap(det, anno, i / 100))
             m_ap = round(mean(m_ap), 2)
             if self.csv_file:
                 log.error('CSV file is not possible with the coco metric')
@@ -60,25 +60,30 @@ class TestEngine:
         print(f'mAP: {m_ap:.2f}%')
 
         if det_file is not None:
-            bbb.filter_discard(det, [lambda b: b.confidence > .25])
+            bbb.filter_discard(det, [lambda b: b.confidence > 0.25])
 
-            det_epfl = {k:v for k,v in det.items() if 'epfl' in k}
-            for k,v in det_epfl.items():
-                det_epfl[k] = ln.data.transform.ReverseLetterbox.apply([v], self.params.input_dimension, (512,424))[0]
-            det_frei = {k:v for k,v in det.items() if 'frei' in k}
-            for k,v in det_frei.items():
-                det_frei[k] = ln.data.transform.ReverseLetterbox.apply([v], self.params.input_dimension, (960,540))[0]
+            det_epfl = {k: v for k, v in det.items() if 'epfl' in k}
+            for k, v in det_epfl.items():
+                det_epfl[k] = ln.data.transform.ReverseLetterbox.apply(
+                    [v], self.params.input_dimension, (512, 424)
+                )[0]
+            det_frei = {k: v for k, v in det.items() if 'frei' in k}
+            for k, v in det_frei.items():
+                det_frei[k] = ln.data.transform.ReverseLetterbox.apply(
+                    [v], self.params.input_dimension, (960, 540)
+                )[0]
             det = dict(det_epfl, **det_frei)
 
             base_path = Path(det_file)
-            bbb.generate('det_pickle', det, str(base_path.parent / (base_path.stem + '.pkl')))
+            bbb.generate(
+                'det_pickle', det, str(base_path.parent / (base_path.stem + '.pkl'))
+            )
 
         if results_file is not None:
             with open(results_file, 'a') as results:
                 results.write('%s,%0.08f,%0.08f\n' % (self.weight, loss_tot, m_ap))
 
-
-    def ap(self, det, anno, iou=.5, csv=None):
+    def ap(self, det, anno, iou=0.5, csv=None):
         if csv is not None:
             base_path = Path(csv)
 
@@ -92,12 +97,24 @@ class TestEngine:
         else:
             aps = []
             for c in tqdm(self.params.class_label_map):
-                anno_c = bbb.filter_discard(copy.deepcopy(anno), [ lambda a: a.class_label == c ])
-                det_c  = bbb.filter_discard(copy.deepcopy(det), [ lambda d: d.class_label == c ])
+                anno_c = bbb.filter_discard(
+                    copy.deepcopy(anno), [lambda a: a.class_label == c]
+                )
+                det_c = bbb.filter_discard(
+                    copy.deepcopy(det), [lambda d: d.class_label == c]
+                )
                 pr = bbb.pr(det_c, anno_c)
 
                 if csv is not None:
-                    np.savetxt(str(base_path.with_name(base_path.stem + f'_{c}' + base_path.suffix)), np.array(pr), delimiter=',')
+                    np.savetxt(
+                        str(
+                            base_path.with_name(
+                                base_path.stem + f'_{c}' + base_path.suffix
+                            )
+                        ),
+                        np.array(pr),
+                        delimiter=',',
+                    )
 
                 aps.append(bbb.ap(*pr))
 
@@ -125,14 +142,26 @@ class TestEngine:
                 t_net += t2 - t1
                 t_pp += t3 - t2
 
-                base_idx = idx*self.params.batch_size
-                anno.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(target)})
-                det.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(output)})
+                base_idx = idx * self.params.batch_size
+                anno.update(
+                    {
+                        self.test_dataloader.dataset.keys[base_idx + k]: v
+                        for k, v in enumerate(target)
+                    }
+                )
+                det.update(
+                    {
+                        self.test_dataloader.dataset.keys[base_idx + k]: v
+                        for k, v in enumerate(output)
+                    }
+                )
 
             t_net_img = t_net * 1000 / len(self.test_dataloader.dataset)
             t_pp_img = t_pp * 1000 / len(self.test_dataloader.dataset)
             t_tot_img = t_net_img + t_pp_img
-            log.info(f'Time:{t_tot_img:.2f}ms/img (Network:{t_net_img:.3f} Post:{t_pp_img:.3f})')
+            log.info(
+                f'Time:{t_tot_img:.2f}ms/img (Network:{t_net_img:.3f} Post:{t_pp_img:.3f})'
+            )
 
             self.network.postprocess = pp
 
@@ -143,31 +172,49 @@ class TestEngine:
         anno, det = {}, {}
 
         with torch.no_grad():
-            for idx, (data, target) in tqdm(enumerate(self.test_dataloader), total=len(self.test_dataloader)):
+            for idx, (data, target) in tqdm(
+                enumerate(self.test_dataloader), total=len(self.test_dataloader)
+            ):
                 data = data.to(self.device)
                 output, loss = self.network(data, target)
 
-                loss_dict['tot'].append(self.network.loss.loss_tot.item()*len(target))
-                loss_dict['coord'].append(self.network.loss.loss_coord.item()*len(target))
-                loss_dict['conf'].append(self.network.loss.loss_conf.item()*len(target))
+                loss_dict['tot'].append(self.network.loss.loss_tot.item() * len(target))
+                loss_dict['coord'].append(
+                    self.network.loss.loss_coord.item() * len(target)
+                )
+                loss_dict['conf'].append(self.network.loss.loss_conf.item() * len(target))
                 loss_cls = self.network.loss.loss_cls
                 loss_cls = np.nan if loss_cls is None else loss_cls.item()
-                loss_dict['cls'].append(loss_cls*len(target))
-                base_idx = idx*self.params.batch_size
-                anno.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(target)})
-                det.update({self.test_dataloader.dataset.keys[base_idx+k]: v for k,v in enumerate(output)})
+                loss_dict['cls'].append(loss_cls * len(target))
+                base_idx = idx * self.params.batch_size
+                anno.update(
+                    {
+                        self.test_dataloader.dataset.keys[base_idx + k]: v
+                        for k, v in enumerate(target)
+                    }
+                )
+                det.update(
+                    {
+                        self.test_dataloader.dataset.keys[base_idx + k]: v
+                        for k, v in enumerate(output)
+                    }
+                )
 
-        loss_tot = sum(loss_dict['tot'])/len(anno)
-        loss_coord = sum(loss_dict['coord'])/len(anno)
-        loss_conf = sum(loss_dict['conf'])/len(anno)
-        loss_cls = sum(loss_dict['cls'])/len(anno)
+        loss_tot = sum(loss_dict['tot']) / len(anno)
+        loss_coord = sum(loss_dict['coord']) / len(anno)
+        loss_conf = sum(loss_dict['conf']) / len(anno)
+        loss_cls = sum(loss_dict['cls']) / len(anno)
         if self.loss == 'percent':
             loss_coord *= 100 / loss_tot
             loss_conf *= 100 / loss_tot
             loss_cls *= 100 / loss_tot
-            log.info(f'Loss:{loss_tot:.5f} (Coord:{loss_coord:.2f}% Conf:{loss_conf:.2f}% Class:{loss_cls:.2f}%)')
+            log.info(
+                f'Loss:{loss_tot:.5f} (Coord:{loss_coord:.2f}% Conf:{loss_conf:.2f}% Class:{loss_cls:.2f}%)'
+            )
         else:
-            log.info(f'Loss:{loss_tot:.5f} (Coord:{loss_coord:.2f} Conf:{loss_conf:.2f} Class:{loss_cls:.2f})')
+            log.info(
+                f'Loss:{loss_tot:.5f} (Coord:{loss_coord:.2f} Conf:{loss_conf:.2f} Class:{loss_cls:.2f})'
+            )
 
         return anno, det, loss_tot
 
@@ -175,15 +222,32 @@ class TestEngine:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Test trained network')
     parser.add_argument('weight', help='Path to weight file', default=None, nargs='+')
-    parser.add_argument('--csv', help='Path for the csv file with the results', default=None)
+    parser.add_argument(
+        '--csv', help='Path for the csv file with the results', default=None
+    )
     parser.add_argument('--det', help='Path for the detection file', default=None)
     parser.add_argument('--results', help='Path for the results', default=None)
     parser.add_argument('-n', '--network', help='network config file')
-    parser.add_argument('-s', '--save', help='File to store network weights', default=None)
+    parser.add_argument(
+        '-s', '--save', help='File to store network weights', default=None
+    )
     parser.add_argument('-c', '--cuda', action='store_true', help='Use cuda')
-    parser.add_argument('-f', '--fast-pr', action='store_true', help='Use faster but less accurate PR computation method')
-    parser.add_argument('-l', '--loss', help='How to display loss', choices=['abs', 'percent', 'none'], default='abs')
-    parser.add_argument('-t', '--thresh', help='Detection Threshold', type=float, default=None)
+    parser.add_argument(
+        '-f',
+        '--fast-pr',
+        action='store_true',
+        help='Use faster but less accurate PR computation method',
+    )
+    parser.add_argument(
+        '-l',
+        '--loss',
+        help='How to display loss',
+        choices=['abs', 'percent', 'none'],
+        default='abs',
+    )
+    parser.add_argument(
+        '-t', '--thresh', help='Detection Threshold', type=float, default=None
+    )
 
     args = parser.parse_args()
 
@@ -207,5 +271,7 @@ if __name__ == '__main__':
                 params.network.save_weights(args.save)
 
             # Start test
-            eng = TestEngine(params, device=device, loss=args.loss, fast_pr=args.fast_pr, weight=weight)
+            eng = TestEngine(
+                params, device=device, loss=args.loss, fast_pr=args.fast_pr, weight=weight
+            )
             eng(args.csv, args.det, args.results)

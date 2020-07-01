@@ -70,6 +70,7 @@ class Engine(ABC):
         >>> # Create TrainingEngine object and run it
 
     """
+
     _init_done = False
     _epoch_start = {}
     _epoch_end = {}
@@ -81,7 +82,9 @@ class Engine(ABC):
         if dataloader is not None:
             self.dataloader = dataloader
         else:
-            log.warn('No dataloader given, make sure to have a self.dataloader property for this engine to work with.')
+            log.warn(
+                'No dataloader given, make sure to have a self.dataloader property for this engine to work with.'
+            )
 
         # Sigint handling
         self.sigint = False
@@ -131,7 +134,7 @@ class Engine(ABC):
 
                 # Check if we need to stop training
                 if self.quit() or self.sigint:
-                    self.epoch -= 1     # Did not finish this epoch
+                    self.epoch -= 1  # Did not finish this epoch
                     log.info('Reached quitting criteria')
                     return
 
@@ -194,6 +197,7 @@ class Engine(ABC):
         Args:
             interval (int, optional): Number dictating how often to run the hook; Default **1**
         """
+
         def decorator(fn):
             if interval in cls._epoch_start:
                 cls._epoch_start[interval].append(fn)
@@ -210,6 +214,7 @@ class Engine(ABC):
         Args:
             interval (int, optional): Number dictating how often to run the hook; Default **1**
         """
+
         def decorator(fn):
             if interval in cls._epoch_end:
                 cls._epoch_end[interval].append(fn)
@@ -226,6 +231,7 @@ class Engine(ABC):
         Args:
             interval (int, optional): Number dictating how often to run the hook; Default **1**
         """
+
         def decorator(fn):
             if interval in cls._batch_start:
                 cls._batch_start[interval].append(fn)
@@ -242,6 +248,7 @@ class Engine(ABC):
         Args:
             interval (int, optional): Number dictating how often to run the hook; Default **1**
         """
+
         def decorator(fn):
             if interval in cls._batch_end:
                 cls._batch_end[interval].append(fn)

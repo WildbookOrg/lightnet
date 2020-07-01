@@ -25,6 +25,7 @@ class Dataset(torchDataset):
     Args:
         input_dimension (tuple): (width,height) tuple with default dimensions of the network
     """
+
     def __init__(self, input_dimension):
         super().__init__()
         self.__input_dim = input_dimension[:2]
@@ -60,6 +61,7 @@ class Dataset(torchDataset):
             >>> data[(480,320), 0]
             (480, 320)
         """
+
         @wraps(getitem_fn)
         def wrapper(self, index):
             if not isinstance(index, int):
@@ -118,6 +120,7 @@ class DataLoader(torchDataLoader):
         [[(480, 320), (480, 320)]]
         [[(480, 320), (480, 320)]]
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__initialized = False
@@ -154,7 +157,12 @@ class DataLoader(torchDataLoader):
                     sampler = torch.utils.data.sampler.RandomSampler(self.dataset)
                 else:
                     sampler = torch.utils.data.sampler.SequentialSampler(self.dataset)
-            batch_sampler = BatchSampler(sampler, self.batch_size, self.drop_last, input_dimension=self.dataset.input_dim)
+            batch_sampler = BatchSampler(
+                sampler,
+                self.batch_size,
+                self.drop_last,
+                input_dimension=self.dataset.input_dim,
+            )
 
         self.sampler = sampler
         self.batch_sampler = batch_sampler
@@ -195,6 +203,7 @@ class BatchSampler(torchBatchSampler):
     It works just like the :class:`torch.utils.data.sampler.BatchSampler`, but it will prepend a dimension,
     whilst ensuring it stays the same across one mini-batch.
     """
+
     def __init__(self, *args, input_dimension=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.input_dim = input_dimension
