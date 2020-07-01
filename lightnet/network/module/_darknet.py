@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 class Darknet(Lightnet):
     """ This network module provides functionality to load darknet weight files.
     """
+
     def __init__(self):
         super().__init__()
         self.header = [0, 2, 0]
@@ -75,7 +76,9 @@ class Darknet(Lightnet):
                 weights.load_layer(module)
                 log.debug(f'Layer loaded: {module}')
                 if weights.start >= weights.size:
-                    log.debug(f'Finished loading weights [{weights.start}/{weights.size} weights]')
+                    log.debug(
+                        f'Finished loading weights [{weights.start}/{weights.size} weights]'
+                    )
                     break
             except NotImplementedError:
                 log.debug(f'Layer skipped: {module.__class__.__name__}')
@@ -99,20 +102,29 @@ class Darknet(Lightnet):
 
 class WeightLoader:
     """ Load darknet weight files into pytorch layers """
+
     def __init__(self, filename):
         with open(filename, 'rb') as fp:
             self.header = np.fromfile(fp, count=3, dtype=np.int32).tolist()
-            ver_num = self.header[0]*100+self.header[1]*10+self.header[2]
-            log.debug(f'Loading weight file: version {self.header[0]}.{self.header[1]}.{self.header[2]}')
+            ver_num = self.header[0] * 100 + self.header[1] * 10 + self.header[2]
+            log.debug(
+                f'Loading weight file: version {self.header[0]}.{self.header[1]}.{self.header[2]}'
+            )
 
             if ver_num <= 19:
-                log.warn('Weight file uses sizeof to compute variable size, which might lead to undefined behaviour. (choosing int=int32, float=float32)')
+                log.warn(
+                    'Weight file uses sizeof to compute variable size, which might lead to undefined behaviour. (choosing int=int32, float=float32)'
+                )
                 self.seen = int(np.fromfile(fp, count=1, dtype=np.int32)[0])
             elif ver_num <= 29:
-                log.warn('Weight file uses sizeof to compute variable size, which might lead to undefined behaviour. (choosing int=int32, float=float32, size_t=int64)')
+                log.warn(
+                    'Weight file uses sizeof to compute variable size, which might lead to undefined behaviour. (choosing int=int32, float=float32, size_t=int64)'
+                )
                 self.seen = int(np.fromfile(fp, count=1, dtype=np.int64)[0])
             else:
-                log.error('New weight file syntax! Loading of weights might not work properly. Please submit an issue with the weight file version number. [Run with DEBUG logging level]')
+                log.error(
+                    'New weight file syntax! Loading of weights might not work properly. Please submit an issue with the weight file version number. [Run with DEBUG logging level]'
+                )
                 self.seen = int(np.fromfile(fp, count=1, dtype=np.int64)[0])
 
             self.buf = np.fromfile(fp, dtype=np.float32)
@@ -129,68 +141,102 @@ class WeightLoader:
         elif type(layer) == nn.Linear:
             self._load_fc(layer)
         else:
-            raise NotImplementedError(f'The layer you are trying to load is not supported [{type(layer)}]')
+            raise NotImplementedError(
+                f'The layer you are trying to load is not supported [{type(layer)}]'
+            )
 
     def _load_conv(self, model):
         num_b = model.bias.numel()
-        model.bias.data.copy_(torch.from_numpy(self.buf[self.start:self.start+num_b])
-                                   .view_as(model.bias.data))
+        model.bias.data.copy_(
+            torch.from_numpy(self.buf[self.start : self.start + num_b]).view_as(
+                model.bias.data
+            )
+        )
         self.start += num_b
 
         num_w = model.weight.numel()
-        model.weight.data.copy_(torch.from_numpy(self.buf[self.start:self.start+num_w])
-                                     .view_as(model.weight.data))
+        model.weight.data.copy_(
+            torch.from_numpy(self.buf[self.start : self.start + num_w]).view_as(
+                model.weight.data
+            )
+        )
         self.start += num_w
 
     def _load_convbatch(self, model):
         num_b = model.layers[1].bias.numel()
-        model.layers[1].bias.data.copy_(torch.from_numpy(self.buf[self.start:self.start+num_b])
-                                             .view_as(model.layers[1].bias.data))
+        model.layers[1].bias.data.copy_(
+            torch.from_numpy(self.buf[self.start : self.start + num_b]).view_as(
+                model.layers[1].bias.data
+            )
+        )
         self.start += num_b
-        model.layers[1].weight.data.copy_(torch.from_numpy(self.buf[self.start:self.start+num_b])
-                                               .view_as(model.layers[1].weight.data))
+        model.layers[1].weight.data.copy_(
+            torch.from_numpy(self.buf[self.start : self.start + num_b]).view_as(
+                model.layers[1].weight.data
+            )
+        )
         self.start += num_b
-        model.layers[1].running_mean.copy_(torch.from_numpy(self.buf[self.start:self.start+num_b])
-                                                .view_as(model.layers[1].running_mean))
+        model.layers[1].running_mean.copy_(
+            torch.from_numpy(self.buf[self.start : self.start + num_b]).view_as(
+                model.layers[1].running_mean
+            )
+        )
         self.start += num_b
-        model.layers[1].running_var.copy_(torch.from_numpy(self.buf[self.start:self.start+num_b])
-                                               .view_as(model.layers[1].running_var))
+        model.layers[1].running_var.copy_(
+            torch.from_numpy(self.buf[self.start : self.start + num_b]).view_as(
+                model.layers[1].running_var
+            )
+        )
         self.start += num_b
 
         num_w = model.layers[0].weight.numel()
-        model.layers[0].weight.data.copy_(torch.from_numpy(self.buf[self.start:self.start+num_w])
-                                               .view_as(model.layers[0].weight.data))
+        model.layers[0].weight.data.copy_(
+            torch.from_numpy(self.buf[self.start : self.start + num_w]).view_as(
+                model.layers[0].weight.data
+            )
+        )
         self.start += num_w
 
     def _load_fc(self, model):
         num_b = model.bias.numel()
-        model.bias.data.copy_(torch.from_numpy(self.buf[self.start:self.start+num_b])
-                                   .view_as(model.bias.data))
+        model.bias.data.copy_(
+            torch.from_numpy(self.buf[self.start : self.start + num_b]).view_as(
+                model.bias.data
+            )
+        )
         self.start += num_b
 
         num_w = model.weight.numel()
-        model.weight.data.copy_(torch.from_numpy(self.buf[self.start:self.start+num_w])
-                                     .view_as(model.weight.data))
+        model.weight.data.copy_(
+            torch.from_numpy(self.buf[self.start : self.start + num_w]).view_as(
+                model.weight.data
+            )
+        )
         self.start += num_w
 
 
 class WeightSaver:
     """ Save darknet weight files from pytorch layers """
+
     def __init__(self, header, seen):
         self.weights = []
         self.header = np.array(header, dtype=np.int32)
-        ver_num = self.header[0]*100+self.header[1]*10+self.header[2]
+        ver_num = self.header[0] * 100 + self.header[1] * 10 + self.header[2]
         if ver_num <= 19:
             self.seen = np.int32(seen)
         elif ver_num <= 29:
             self.seen = np.int64(seen)
         else:
-            log.error('New weight file syntax! Saving of weights might not work properly. Please submit an issue with the weight file version number. [Run with DEBUG logging level]')
+            log.error(
+                'New weight file syntax! Saving of weights might not work properly. Please submit an issue with the weight file version number. [Run with DEBUG logging level]'
+            )
             self.seen = np.int64(seen)
 
     def write_file(self, filename):
         """ Save the accumulated weights to a darknet weightfile """
-        log.debug(f'Writing weight file: version {self.header[0]}.{self.header[1]}.{self.header[2]}')
+        log.debug(
+            f'Writing weight file: version {self.header[0]}.{self.header[1]}.{self.header[2]}'
+        )
         with open(filename, 'wb') as fp:
             self.header.tofile(fp)
             self.seen.tofile(fp)
@@ -207,7 +253,9 @@ class WeightSaver:
         elif type(layer) == nn.Linear:
             self._save_fc(layer)
         else:
-            raise NotImplementedError(f'The layer you are trying to save is not supported [{type(layer)}]')
+            raise NotImplementedError(
+                f'The layer you are trying to save is not supported [{type(layer)}]'
+            )
 
     def _save_conv(self, model):
         self.weights.append(model.bias.cpu().data.numpy())

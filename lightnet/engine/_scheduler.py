@@ -38,6 +38,7 @@ class SchedulerCompositor:
         3 - Dummy Scheduler: end
         4 - Dummy Scheduler: end
     """
+
     def __init__(self, *args):
         if len(args) == 0:
             raise ValueError('Compositor requires at least one scheduler')

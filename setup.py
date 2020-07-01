@@ -8,6 +8,7 @@ def get_dist(pkgname):
     except DistributionNotFound:
         return None
 
+
 def get_version():
     with open('VERSION', 'r') as f:
         version = f.read().splitlines()[0]
@@ -37,9 +38,7 @@ setup_kwargs = dict(
     packages=find_packages(),
     test_suite='test',
     install_requires=requirements,
-    extras_require={
-        'visual': ['visdom']
-    },
+    extras_require={'visual': ['visdom']},
 )
 
 

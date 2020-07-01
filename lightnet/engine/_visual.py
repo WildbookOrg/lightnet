@@ -27,6 +27,7 @@ class LinePlotter:
         If the visdom argument is None, this plotter will do nothing.
         This can be used to disable using the visdom plotter, without having to check for it in the application code.
     """
+
     def __init__(self, visdom, window=None, env=None, name=None, opts={}):
         self.vis = visdom
         self.win = window
@@ -90,7 +91,9 @@ class LinePlotter:
             self.vis.line(None, win=self.win, env=self.env, name=name, update='remove')
         else:
             for name in self.traces:
-                self.vis.line(None, win=self.win, env=self.env, name=name, update='remove')
+                self.vis.line(
+                    None, win=self.win, env=self.env, name=name, update='remove'
+                )
 
     def close(self):
         """ Close the visdom window. """

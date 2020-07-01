@@ -37,8 +37,23 @@ class MobileNetYolo(lnn.module.Lightnet):
         When changing the ``alpha`` value, you are changing the network architecture.
         This means you cannot use weights from this network with a different alpha value.
     """
-    def __init__(self, num_classes=20, weights_file=None, conf_thresh=.25, nms_thresh=.5, alpha=1.0, input_channels=3,
-                 anchors=[(1.3221, 1.73145), (3.19275, 4.00944), (5.05587, 8.09892), (9.47112, 4.84053), (11.2364, 10.0071)]):
+
+    def __init__(
+        self,
+        num_classes=20,
+        weights_file=None,
+        conf_thresh=0.25,
+        nms_thresh=0.5,
+        alpha=1.0,
+        input_channels=3,
+        anchors=[
+            (1.3221, 1.73145),
+            (3.19275, 4.00944),
+            (5.05587, 8.09892),
+            (9.47112, 4.84053),
+            (11.2364, 10.0071),
+        ],
+    ):
         super().__init__()
         if not isinstance(anchors, Iterable) and not isinstance(anchors[0], Iterable):
             raise TypeError('Anchors need to be a 2D list of numbers')
@@ -46,51 +61,140 @@ class MobileNetYolo(lnn.module.Lightnet):
         # Parameters
         self.num_classes = num_classes
         self.anchors = anchors
-        self.reduction = 32     # input_dim/output_dim
+        self.reduction = 32  # input_dim/output_dim
 
         # Network
         layer_list = [
             # Sequence 0 : input = image tensor
-            OrderedDict([
-                ('1_convbatch',     lnn.layer.Conv2dBatchReLU(input_channels, int(alpha*32),  3, 2, 1)),
-                ('2_convdw',        lnn.layer.Conv2dDepthWise(int(alpha*32),  int(alpha*64),  3, 1, 1)),
-                ('3_convdw',        lnn.layer.Conv2dDepthWise(int(alpha*64),  int(alpha*128), 3, 2, 1)),
-                ('4_convdw',        lnn.layer.Conv2dDepthWise(int(alpha*128), int(alpha*128), 3, 1, 1)),
-                ('5_convdw',        lnn.layer.Conv2dDepthWise(int(alpha*128), int(alpha*256), 3, 2, 1)),
-                ('6_convdw',        lnn.layer.Conv2dDepthWise(int(alpha*256), int(alpha*256), 3, 1, 1)),
-                ('7_convdw',        lnn.layer.Conv2dDepthWise(int(alpha*256), int(alpha*512), 3, 2, 1)),
-                ('8_convdw',        lnn.layer.Conv2dDepthWise(int(alpha*512), int(alpha*512), 3, 1, 1)),
-                ('9_convdw',        lnn.layer.Conv2dDepthWise(int(alpha*512), int(alpha*512), 3, 1, 1)),
-            ]),
-
+            OrderedDict(
+                [
+                    (
+                        '1_convbatch',
+                        lnn.layer.Conv2dBatchReLU(
+                            input_channels, int(alpha * 32), 3, 2, 1
+                        ),
+                    ),
+                    (
+                        '2_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 32), int(alpha * 64), 3, 1, 1
+                        ),
+                    ),
+                    (
+                        '3_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 64), int(alpha * 128), 3, 2, 1
+                        ),
+                    ),
+                    (
+                        '4_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 128), int(alpha * 128), 3, 1, 1
+                        ),
+                    ),
+                    (
+                        '5_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 128), int(alpha * 256), 3, 2, 1
+                        ),
+                    ),
+                    (
+                        '6_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 256), int(alpha * 256), 3, 1, 1
+                        ),
+                    ),
+                    (
+                        '7_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 256), int(alpha * 512), 3, 2, 1
+                        ),
+                    ),
+                    (
+                        '8_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 512), int(alpha * 512), 3, 1, 1
+                        ),
+                    ),
+                    (
+                        '9_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 512), int(alpha * 512), 3, 1, 1
+                        ),
+                    ),
+                ]
+            ),
             # Sequence 1 : input = sequence0
-            OrderedDict([
-                ('10_convdw',       lnn.layer.Conv2dDepthWise(int(alpha*512), int(alpha*512),  3, 1, 1)),
-                ('11_convdw',       lnn.layer.Conv2dDepthWise(int(alpha*512), int(alpha*512),  3, 1, 1)),
-                ('12_convdw',       lnn.layer.Conv2dDepthWise(int(alpha*512), int(alpha*512),  3, 1, 1)),
-                ('13_convdw',       lnn.layer.Conv2dDepthWise(int(alpha*512), int(alpha*1024), 3, 2, 1)),
-            ]),
-
+            OrderedDict(
+                [
+                    (
+                        '10_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 512), int(alpha * 512), 3, 1, 1
+                        ),
+                    ),
+                    (
+                        '11_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 512), int(alpha * 512), 3, 1, 1
+                        ),
+                    ),
+                    (
+                        '12_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 512), int(alpha * 512), 3, 1, 1
+                        ),
+                    ),
+                    (
+                        '13_convdw',
+                        lnn.layer.Conv2dDepthWise(
+                            int(alpha * 512), int(alpha * 1024), 3, 2, 1
+                        ),
+                    ),
+                ]
+            ),
             # Sequence 2 : input = sequence0
-            OrderedDict([
-                ('14_convbatch',    lnn.layer.Conv2dBatchReLU(int(alpha*512), 64, 1, 1, 0)),
-                ('15_reorg',        lnn.layer.Reorg(2)),
-            ]),
-
+            OrderedDict(
+                [
+                    (
+                        '14_convbatch',
+                        lnn.layer.Conv2dBatchReLU(int(alpha * 512), 64, 1, 1, 0),
+                    ),
+                    ('15_reorg', lnn.layer.Reorg(2)),
+                ]
+            ),
             # Sequence 3 : input = sequence2 + sequence1
-            OrderedDict([
-                ('16_convbatch',    lnn.layer.Conv2dBatchReLU((4*64)+int(alpha*1024), 1024, 3, 1, 1)),
-                ('17_conv',         nn.Conv2d(1024, len(self.anchors)*(5+self.num_classes), 1, 1, 0)),
-            ])
+            OrderedDict(
+                [
+                    (
+                        '16_convbatch',
+                        lnn.layer.Conv2dBatchReLU(
+                            (4 * 64) + int(alpha * 1024), 1024, 3, 1, 1
+                        ),
+                    ),
+                    (
+                        '17_conv',
+                        nn.Conv2d(
+                            1024, len(self.anchors) * (5 + self.num_classes), 1, 1, 0
+                        ),
+                    ),
+                ]
+            ),
         ]
-        self.layers = nn.ModuleList([nn.Sequential(layer_dict) for layer_dict in layer_list])
+        self.layers = nn.ModuleList(
+            [nn.Sequential(layer_dict) for layer_dict in layer_list]
+        )
 
         # Post
         self.loss = lnn.loss.RegionLoss(self.num_classes, self.anchors, self.reduction, 0)
-        self.postprocess = lnd.transform.Compose([
-            lnd.transform.GetBoundingBoxes(self.num_classes, self.anchors, conf_thresh),
-            lnd.transform.NonMaxSupression(nms_thresh)
-        ])
+        self.postprocess = lnd.transform.Compose(
+            [
+                lnd.transform.GetBoundingBoxes(
+                    self.num_classes, self.anchors, conf_thresh
+                ),
+                lnd.transform.NonMaxSupression(nms_thresh),
+            ]
+        )
 
         if weights_file is not None:
             self.load_weights(weights_file)
