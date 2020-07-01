@@ -1,4 +1,4 @@
-# Runtime dependencies
-git+https://gitlab.com/bluemellophone/brambox
 
 .[visual]
+# Runtime dependencies
+git+https://gitlab.com/bluemellophone/brambox
