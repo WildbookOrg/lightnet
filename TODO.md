@@ -36,4 +36,3 @@ TODO for version 100
   - [ ] YoloV3
   - [ ] Update to new brambox-pandas version
   - [ ] Check documentation is up-to-date
-

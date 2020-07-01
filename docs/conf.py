@@ -209,6 +209,3 @@ texinfo_documents = [
      author, 'Lightnet', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
