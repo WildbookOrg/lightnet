@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Lightnet dataset that uses the same files and structure as darknet and performs the same data augmentations.
 #   Copyright EAVISE

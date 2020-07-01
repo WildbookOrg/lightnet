@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Extra lightnet layers
 #   Copyright EAVISE

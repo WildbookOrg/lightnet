@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Lightnet related data processing
 #   Utilitary classes and functions for the data subpackage

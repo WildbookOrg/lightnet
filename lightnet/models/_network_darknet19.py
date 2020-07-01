@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Darknet Darknet19 model
 #   Copyright EAVISE

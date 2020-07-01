@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Learning Rate Scheduling
 #   Copyright EAVISE

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Lightnet related postprocessing
 #   Thers are functions to transform the output of the network to brambox detection objects

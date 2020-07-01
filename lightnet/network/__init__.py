@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Lightnet Network Module |br|
 This module contains classes and functions to create deep neural network with pytorch_.

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Lightnet Models Module |br|
 This module contains networks that were recreated with this library.

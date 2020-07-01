@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Lightnet : Darknet building blocks implemented in pytorch
 #   Copyright EAVISE

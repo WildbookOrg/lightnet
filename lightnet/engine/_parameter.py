@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   HyperParemeters container class
 #   Copyright EAVISE

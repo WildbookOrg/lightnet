@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #   Image and annotations preprocessing for lightnet networks
 #   The image transformations work with both Pillow and OpenCV images
