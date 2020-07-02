@@ -6,8 +6,9 @@
 
 __all__ = ['network', 'data', 'engine', 'models']
 
+__version__ = '2.0.0'
 
-from .version import __version__
+
 from .log import *
 
 from . import network
