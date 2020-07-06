@@ -9,31 +9,6 @@ def get_dist(pkgname):
         return None
 
 
-def parse_version(fpath):
-    """
-    Statically parse the version number from a python file
-
-    """
-    import ast
-    from os.path import exists
-
-    if not exists(fpath):
-        raise ValueError('fpath={!r} does not exist'.format(fpath))
-    with open(fpath, 'r') as file_:
-        sourcecode = file_.read()
-    pt = ast.parse(sourcecode)
-
-    class VersionVisitor(ast.NodeVisitor):
-        def visit_Assign(self, node):
-            for target in node.targets:
-                if getattr(target, 'id', None) == '__version__':
-                    self.version = node.value.s
-
-    visitor = VersionVisitor()
-    visitor.visit(pt)
-    return visitor.version
-
-
 requirements = [
     'numpy',
     'torchvision',
@@ -43,11 +18,19 @@ requirements = [
 
 setup_kwargs = dict(
     name='wbia-lightnet',
-    version=parse_version('lightnet/__init__.py'),
     author='EAVISE, WildMe Developers',
     author_email='dev@wildme.org',
     description='Building blocks for recreating darknet networks in pytorch',
     long_description=open('README.md').read(),
+    # The following settings retreive the version from git.
+    # See https://github.com/pypa/setuptools_scm/ for more information
+    setup_requires=['setuptools_scm'],
+    use_scm_version={
+        'write_to': 'lightnet/_version.py',
+        'write_to_template': '__version__ = "{version}"',
+        'tag_regex': '^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$',
+        'local_scheme': 'dirty-tag',
+    },
     packages=find_packages(),
     test_suite='test',
     install_requires=requirements,
