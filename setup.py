@@ -11,13 +11,6 @@ def get_dist(pkgname):
         return None
 
 
-requirements = [
-    'numpy',
-    'torchvision',
-    'wbia-brambox',
-]
-
-
 setup_kwargs = dict(
     name='wbia-lightnet',
     author='EAVISE, WildMe Developers',
@@ -35,8 +28,6 @@ setup_kwargs = dict(
     },
     packages=find_packages(),
     test_suite='test',
-    install_requires=requirements,
-    extras_require={'visual': ['visdom']},
 )
 
 
@@ -120,4 +111,11 @@ def parse_requirements(fname='requirements.txt', with_version=False):
 
 
 if __name__ == '__main__':
+    install_requires = parse_requirements('requirements/runtime.txt')
+    extras_require = {
+        'all': parse_requirements('requirements.txt'),
+        'runtime': parse_requirements('requirements/runtime.txt'),
+        'build': parse_requirements('requirements/build.txt'),
+        'visual': parse_requirements('requirements/visual.txt'),
+    }
     setup(**setup_kwargs)
