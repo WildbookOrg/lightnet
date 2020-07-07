@@ -1,4 +1,3 @@
-
-.[visual]
-# Runtime dependencies
-git+https://gitlab.com/bluemellophone/brambox
+-r requirements/build.txt
+-r requirements/runtime.txt
+-r requirements/visual.txt
