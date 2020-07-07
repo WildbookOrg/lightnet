@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from setuptools import find_packages, setup
+from pkg_resources import get_distribution, DistributionNotFound
 
 
 def get_dist(pkgname):
