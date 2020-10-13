@@ -26,7 +26,7 @@ setup_kwargs = dict(
         'tag_regex': '^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$',
         'local_scheme': 'dirty-tag',
     },
-    packages=find_packages(),
+    packages=find_packages(exclude=('test',)),
     test_suite='test',
 )
 
