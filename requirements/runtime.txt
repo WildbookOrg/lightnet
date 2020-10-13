@@ -1,3 +1,6 @@
+matplotlib  # requirement for brambox
 numpy
+Pillow  # requirement for brambox
+pyyaml  # requirement for brambox
+scipy  # requirement for brambox
 torchvision
-wbia-brambox
