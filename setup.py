@@ -26,7 +26,9 @@ setup_kwargs = dict(
         'tag_regex': '^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$',
         'local_scheme': 'dirty-tag',
     },
-    packages=find_packages(exclude=('test',)),
+    packages=find_packages(exclude=('test',))
+    + find_packages(where='wbia-tpl-brambox', exclude=('tests', 'tests.*')),
+    package_dir={'lightnet': 'lightnet', 'brambox': 'wbia-tpl-brambox/brambox'},
     test_suite='test',
 )
 
