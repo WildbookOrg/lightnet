@@ -1,0 +1,3 @@
+[submodule "wbia-tpl-brambox"]
+	path = wbia-tpl-brambox
+	url = https://github.com/WildbookOrg/wbia-tpl-brambox.git
