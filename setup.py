@@ -17,6 +17,7 @@ setup_kwargs = dict(
     author_email='dev@wildme.org',
     description='Building blocks for recreating darknet networks in pytorch',
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     # The following settings retreive the version from git.
     # See https://github.com/pypa/setuptools_scm/ for more information
     setup_requires=['setuptools_scm'],
