@@ -36,6 +36,11 @@ jobs:
         run: |
           python -m cibuildwheel --output-dir wheelhouse
 
+      - name: Check wheel
+        run: |
+          python -m pip install twine
+          twine check wheelhouse/*.whl
+
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
@@ -59,6 +64,11 @@ jobs:
         run: |
           pip install scikit-build
           python setup.py sdist
+
+      - name: Check sdist
+        run: |
+          pip install twine
+          twine check dist/*.tar.gz
 
       - uses: actions/upload-artifact@v2
         with:
